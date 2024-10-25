@@ -1,0 +1,63 @@
+trigger: none
+
+#trigger:
+#  branches:
+#    include:
+#    - 'sqd'
+
+#pr:
+#  branches:
+#    include:
+#      - 'release*'
+
+resources:
+#  pipelines:
+#    - pipeline: 'triggeringPipeline'
+#      project: 'DBAProject'  # The project that contains the pipeline triggering this one
+#      source: 'App'  # The name of the pipeline in Project A
+#      branch: 'refs/heads/main'  # The branch in Project A that triggered this pipeline
+#      #version: 'latest'  # Always trigger based on the latest successful run
+
+  repositories:
+  - repository: demo
+    type: github
+    endpoint: GitHub
+    name: RKKoranteng/demo-db
+    ref: release
+    trigger:
+      - release
+
+stages:
+- stage: Build
+  displayName: 'Build Stage'
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - checkout: self
+    - checkout: demo
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Running build for sql server-release pipeline in Project B"
+          # Add your build steps here (e.g., compile code, build database package)
+    displayName: 'Build SQL Server Release'
+
+- stage: Deploy
+  displayName: 'Deploy Stage'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: DeployJob
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Deploying SQL Server package..."
+          # Add your deployment steps here (e.g., deploy database package)
+    displayName: 'Deploy SQL Server Package'
