@@ -23,9 +23,9 @@ resources:
     type: github
     endpoint: RKKOranteng
     name: RKKoranteng/demo-db
-    ref: release
+    ref: release/*
     trigger:
-      - release
+      - release/*
 
 stages:
 - stage: Build
