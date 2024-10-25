@@ -28,7 +28,10 @@ resources:
       branches:
         include: 
           - release
-
+    pr:
+      branches:
+        include:
+          - main
 stages:
 - stage: Build
   displayName: 'Build Stage'
