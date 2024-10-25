@@ -25,7 +25,9 @@ resources:
     name: RKKoranteng/demo-db
     ref: release
     trigger:
-      - release
+      bracnhes:
+        include: 
+          - release
 
 stages:
 - stage: Build
