@@ -131,7 +131,7 @@ stages:
           inputs:
             targetType: 'inline'
             script: | 
-              $version = Select-String -Path changelog.xml -Pattern '<property name="changeLogVersion" value="([^"]+)"' | ForEach-Object {if ($_ -match 'value="([^"]+)"') { $matches[1] }}         
+              $version = Select-String -Path $(System.DefaultWorkingDirectory)/changelog.xml -Pattern '<property name="changeLogVersion" value="([^"]+)"' | ForEach-Object {if ($_ -match 'value="([^"]+)"') { $matches[1] }}         
               $BuildName = ( '$(APPLICATION)' + " - release v-" + $version )
               Write-Host "##vso[build.updatebuildnumber]$BuildName"
           displayName: "Rename Build"
