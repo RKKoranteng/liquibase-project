@@ -125,6 +125,6 @@ stages:
           inputs:
             targetType: 'inline'
             script: |          
-              $BuildName = ( '$(APPLICATIOON)' + " - SQL Server " )
+              $BuildName = ( '$(APPLICATION)' + " - SQL Server " )
               Write-Host "##vso[build.updatebuildnumber]$BuildName"
           displayName: "Rename Build"
