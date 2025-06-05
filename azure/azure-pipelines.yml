@@ -24,7 +24,9 @@ stages:
           inputs:
             targetType: 'inline'
             script: |          
-              echo "build artifact"
+              echo "Deploying to DEV"
+              echo "Host: $(dev_db_host)"
+              echo "DB: $(dev_db_name)"
           displayName: "dev - task 1"
 
 - stage: test
@@ -42,7 +44,9 @@ stages:
           inputs:
             targetType: 'inline'
             script: |          
-              echo "build artifact"
+              echo "Deploying to TEST"
+              echo "Host: $(test_db_host)"
+              echo "DB: $(test_db_name)"
           displayName: "test - task 1"
 
 
@@ -61,7 +65,9 @@ stages:
           inputs:
             targetType: 'inline'
             script: |          
-              echo "build artifact"
+              echo "Deploying to PROD"
+              echo "Host: $(prod_db_host)"
+              echo "DB: $(prod_db_name)"
           displayName: "prod - task 1"
 
 
@@ -124,7 +130,8 @@ stages:
         - task: PowerShell@2
           inputs:
             targetType: 'inline'
-            script: |          
-              $BuildName = ( '$(APPLICATION)' + " - SQL Server " )
+            script: | 
+              version=$(xmllint --xpath "string(//property[@name='changeLogVersion']/@value)" changelog.xml)         
+              $BuildName = ( '$(APPLICATION)' + " - release v-" + $version )
               Write-Host "##vso[build.updatebuildnumber]$BuildName"
           displayName: "Rename Build"
