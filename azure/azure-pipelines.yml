@@ -84,7 +84,7 @@ stages:
           displayName: "rollback - task 1"
 
 
-- stage: post-deploymentg
+- stage: postdeployment
   displayName: "Post Deployment"
   dependsOn: prod
   condition: always()
