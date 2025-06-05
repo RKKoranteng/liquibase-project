@@ -7,7 +7,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
         http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd ">
 
-    <changeSet author="Richard Koranteng" id="create emp table">
+    <changeSet author="Richard Koranteng" id="create:table-emp">
         <sqlFile path="scripts/1.0/create_table_emp.sql" endDelimiter=`"GO`" />
         <rollback>
             <sqlFile path="scripts/1.0/drop_table_emp.sql" endDelimiter=`"GO`" />
