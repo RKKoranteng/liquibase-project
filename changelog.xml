@@ -10,9 +10,9 @@
     <property name="changeLogVersion" value="1.0.1" />
 
     <changeSet author="Richard Koranteng" id="create:table-emp">
-        <sqlFile path="scripts/1.0.1/create_table_emp.sql" endDelimiter=`"GO`" />
+        <sqlFile path="scripts/tables/create_table_emp.sql" endDelimiter=`"GO`" />
         <rollback>
-            <sqlFile path="scripts/1.0.1/drop_table_emp.sql" endDelimiter=`"GO`" />
+            <sqlFile path="scripts/tables/drop_table_emp.sql" endDelimiter=`"GO`" />
         </rollback>
     </changeSet>
 
