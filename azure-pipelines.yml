@@ -1,6 +1,14 @@
 # @name: azure-pipelines.yml
 # @description: ADO pipeline
 
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - changelog.xml
+
 appendCommitMessageToRunName: false
   
 name: $(BuildName)
