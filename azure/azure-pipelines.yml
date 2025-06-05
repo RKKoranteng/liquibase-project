@@ -5,6 +5,9 @@ appendCommitMessageToRunName: false
   
 name: $(BuildName)
 
+variables:
+- template: db-variables.yml
+
 stages:
 - stage: dev
   displayName: "Dev Environment"
