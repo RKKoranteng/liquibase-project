@@ -21,9 +21,8 @@ stages:
   displayName: "Dev Environment"
   jobs:
   
-    # check if server is online
-    - job: ServerAvailability
-      displayName: "Server Availability"
+    - job: db-availability
+      displayName: "DB Availability"
       pool:
         name: 'Azure Pipelines'
       steps:
