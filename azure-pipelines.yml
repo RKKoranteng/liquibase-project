@@ -24,7 +24,7 @@ stages:
     - job: db-availability
       displayName: "DB Availability"
       pool:
-        name: 'Azure Pipelines'
+        name: 'mylocal'
       steps:
 
         - task: PowerShell@2
@@ -44,7 +44,7 @@ stages:
     - job: InstallJob
       displayName: "Installing SQLServer"
       pool:
-        name: 'Azure Pipelines'
+        name: 'mylocal'
       steps:
 
         - task: PowerShell@2
@@ -65,7 +65,7 @@ stages:
     - job: SQLAgentJob
       displayName: "SQL Agent Jobs"
       pool:
-        name: 'Azure Pipelines'
+        name: 'mylocal'
       steps:
 
         - task: PowerShell@2
@@ -86,7 +86,7 @@ stages:
     - job: RollbackJob
       displayName: "Cleaning Failed Installed"
       pool:
-        name: 'Azure Pipelines'
+        name: 'mylocal'
       steps:
 
         - task: PowerShell@2
@@ -107,7 +107,7 @@ stages:
     - job: Artifacts
       displayName: "Artifacts"
       pool:
-        name: 'Azure Pipelines'
+        name: 'mylocal'
       steps:
 
         # create artifacts
@@ -130,7 +130,7 @@ stages:
     - job: RenameBuild
       displayName: "Rename Build"
       pool:
-        name: 'Azure Pipelines'
+        name: 'mylocal'
       steps:
 
         # rename build
