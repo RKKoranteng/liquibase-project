@@ -21,7 +21,7 @@ stages:
   displayName: "Dev Environment"
   jobs:
   
-    - job: db-availability
+    - job: dbavailability
       displayName: "DB Availability"
       pool:
         name: 'mylocal'
