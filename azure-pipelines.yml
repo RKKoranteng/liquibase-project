@@ -1,144 +1,90 @@
 # @name: azure-pipelines.yml
 # @description: ADO pipeline
 
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    include:
-      - changelog.xml
+#trigger:
+#  branches:
+#    include:
+#      - main
+#  paths:
+#    include:
+#      - changelog.xml
 
 appendCommitMessageToRunName: false
   
-name: $(BuildName)
+name: $(Application.Name)-$(Build.BuildId)-CI
+
+pool:
+  name: $(Agent.PoolName)
 
 variables:
-- template: db-variables.yml
+- template: variables.yml
 
 stages:
-- stage: dev
-  displayName: "Dev Environment"
+- stage: CI
+  # condition: contains(variables['Build.SourceBranch'], 'dev')
+  # condition: and(true, contains(variables['system.pullRequest.targetBranchName'], 'release'))
+  # condition: eq('${{ parameters.LBCOMMAND }}', 'update')
   jobs:
-  
-    - job: dbavailability
-      displayName: "DB Availability"
-      pool:
-        name: 'mylocal'
-      steps:
+  # - job: 
+  #   workspace:
+  #     clean: all
+  - job: DB_CI
+    displayName: 'Database CI'
+    steps:
 
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "Deploying to DEV"
-              echo "Host: $(dev_db_host)"
-              echo "DB: $(dev_db_name)"
-          displayName: "dev - task 1"
+    - task: PowerShell@2
+      displayName: 'Liquibase Flow - Run Checks'
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo TAG=${env:TAG}
+          echo App.Version=$(App.Version)
+          echo Build.BuildId=$(Build.BuildId)
 
-- stage: test
-  displayName: "Test Environment"
-  dependsOn: dev
-  condition: succeeded()
-  jobs:
-    - job: InstallJob
-      displayName: "Installing SQLServer"
-      pool:
-        name: 'mylocal'
-      steps:
+          # This flow file runs Liquibase Quality Checks
+          # Both flow file and Quality Checks require Liquibase Pro license
+          C:\agent\_work\_tool\liquibase-4.29.0\liquibase.bat flow --flow-file=flowfiles/liquibase.flowfile-ci.yaml
+          Write-Host Last exit code: $LASTEXITCODE
+      env:
+        TAG: ${{ parameters.TAG }}
+        LIQUIBASE_COMMAND_URL: $(QA_URL)
+        LIQUIBASE_COMMAND_USERNAME: $(QA_USERNAME)
+        LIQUIBASE_COMMAND_PASSWORD: $(QA_PASSWORD)
+        LIQUIBASE_LICENSE_KEY: $(LIQUIBASE_LICENSE_KEY)
 
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "Deploying to TEST"
-              echo "Host: $(test_db_host)"
-              echo "DB: $(test_db_name)"
-          displayName: "test - task 1"
+    # Dir
+    - task: PowerShell@2
+      displayName: 'Liquibase Reports Here'
+      inputs:
+        targetType: 'inline'
+        script: |
+          dir 
+          cd reports
+          dir
 
+    # # Create a package
+    # - task: UniversalPackages@0.228.0
+    #   displayName: 'Publish Artifact Universal Package'
+    #   inputs:
+    #     command: publish
+    #     publishDirectory: '.'
+    #     vstsFeedPublish: 'Carmax/MX_Packages'
+    #     vstsFeedPackagePublish: 'mx-db'
+    #     # versionOption: 'custom'
+    #     # versionPublish: $(Build.BuildId)
+    #     packagePublishDescription: 'Package published by CI job $(Build.BuildId)'
 
-- stage: prod
-  displayName: "Prod Environment"
-  dependsOn: test
-  condition: succeeded()
-  jobs:
-    - job: SQLAgentJob
-      displayName: "SQL Agent Jobs"
-      pool:
-        name: 'mylocal'
-      steps:
+    # Compress files into .zip
+    # - task: ArchiveFiles@2
+    #   displayName: Create a Zip
+    #   inputs:
+    #     rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    #     includeRootFolder: true
+    #     archiveType: 'zip'
+    #     archiveFile: '$(System.DefaultWorkingDirectory)/artifacts/$(Application.Name)-$(Build.BuildId).zip'
 
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "Deploying to PROD"
-              echo "Host: $(prod_db_host)"
-              echo "DB: $(prod_db_name)"
-          displayName: "prod - task 1"
-
-
-- stage: rollback
-  displayName: "Rollback"
-  dependsOn: dev
-  condition: failed()
-  jobs:
-    - job: RollbackJob
-      displayName: "Cleaning Failed Installed"
-      pool:
-        name: 'mylocal'
-      steps:
-
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "build artifact"
-          displayName: "rollback - task 1"
-
-
-- stage: postdeployment
-  displayName: "Post Deployment"
-  dependsOn: prod
-  condition: always()
-  jobs:
-
-    # create & load artifacts
-    - job: Artifacts
-      displayName: "Artifacts"
-      pool:
-        name: 'mylocal'
-      steps:
-
-        # create artifacts
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "build artifact"
-          displayName: "Create Artifact"
-
-        # load artifacts
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "load artifact"
-          displayName: "Upload Artifact"    
-
-    # rename build
-    - job: RenameBuild
-      displayName: "Rename Build"
-      pool:
-        name: 'mylocal'
-      steps:
-
-        # rename build
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: | 
-              $version = Select-String -Path $(System.DefaultWorkingDirectory)/changelog.xml -Pattern '<property name="changeLogVersion" value="([^"]+)"' | ForEach-Object {if ($_ -match 'value="([^"]+)"') { $matches[1] }}         
-              $BuildName = ( '$(APPLICATION)' + " - version " + $version )
-              Write-Host "##vso[build.updatebuildnumber]$BuildName"
-          displayName: "Rename Build"
+    # If using Azure Artifacts
+    # - upload: $(System.DefaultWorkingDirectory)/.
+    - publish: $(System.DefaultWorkingDirectory)/.
+      displayName: Publish artifact
+      artifact: $(Application.Name)
