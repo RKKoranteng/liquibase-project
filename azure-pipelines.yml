@@ -13,6 +13,9 @@ appendCommitMessageToRunName: false
   
 name: $(Application.Name)-$(Build.BuildId)-CI
 
+pool:
+  name: $(Agent.PoolName)
+
 variables:
 - template: variables.yml
 
@@ -22,8 +25,6 @@ stages:
   
   - job: DB_CI
     displayName: "Database CI"
-    pool:
-      name: $(Agent.PoolName)
     steps:
 
     - task: PowerShell@2
@@ -31,7 +32,42 @@ stages:
       inputs:
         targetType: 'inline'
         script: |          
-          echo "Deploying to DEV"
-          echo "Host: $(dev_db_host)"
-          echo "DB: $(dev_db_name)"
+          echo "linting"
+
+    - task: PowerShell@2
+      displayName: "Validate Changelog"
+      inputs:
+        targetType: 'inline'
+        script: |          
+          echo "validating"    
+
+- stage: Build_Artifact
+  jobs:      
+
+  - job: BUILD_DB_ARTIFACT
+    displayName: "Build Artifact"
+    steps:
+
+    - task: PowerShell@2
+      displayName: "Remove Unwanted"
+      inputs:
+        targetType: 'inline'
+        script: |          
+          echo "removing"
+
+- stage: Publish_Artifact
+  jobs:      
+
+  - job: Publish_DB_ARTIFACT
+    displayName: "Publish Artifact"
+    steps:
+
+    - task: PowerShell@2
+      displayName: "Publish"
+      inputs:
+        targetType: 'inline'
+        script: |          
+          echo "validating"   
+ 
+ 
           
