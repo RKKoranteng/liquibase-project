@@ -13,135 +13,25 @@ appendCommitMessageToRunName: false
   
 name: $(Application.Name)-$(Build.BuildId)-CI
 
-pool:
-  name: $(Agent.PoolName)
-
 variables:
 - template: variables.yml
 
 stages:
 - stage: CI
-  displayName: "Database CI"
   jobs:
   
-    - job: dbavailability
-      displayName: "DB Availability"
-      pool:
-        name: $(Agent.PoolName)
-      steps:
+  - job: DB_CI
+    displayName: "Database CI"
+    pool:
+      name: $(Agent.PoolName)
+    steps:
 
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "Deploying to DEV"
-              echo "Host: $(dev_db_host)"
-              echo "DB: $(dev_db_name)"
-          displayName: "dev - task 1"
-
-- stage: test
-  displayName: "Test Environment"
-  dependsOn: dev
-  condition: succeeded()
-  jobs:
-    - job: InstallJob
-      displayName: "Installing SQLServer"
-      pool:
-        name: $(Agent.PoolName)
-      steps:
-
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "Deploying to TEST"
-              echo "Host: $(test_db_host)"
-              echo "DB: $(test_db_name)"
-          displayName: "test - task 1"
-
-
-- stage: prod
-  displayName: "Prod Environment"
-  dependsOn: test
-  condition: succeeded()
-  jobs:
-    - job: SQLAgentJob
-      displayName: "SQL Agent Jobs"
-      pool:
-        name: $(Agent.PoolName)
-      steps:
-
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "Deploying to PROD"
-              echo "Host: $(prod_db_host)"
-              echo "DB: $(prod_db_name)"
-          displayName: "prod - task 1"
-
-
-- stage: rollback
-  displayName: "Rollback"
-  dependsOn: dev
-  condition: failed()
-  jobs:
-    - job: RollbackJob
-      displayName: "Cleaning Failed Installed"
-      pool:
-        name: $(Agent.PoolName)
-      steps:
-
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "build artifact"
-          displayName: "rollback - task 1"
-
-
-- stage: postdeployment
-  displayName: "Post Deployment"
-  dependsOn: prod
-  condition: always()
-  jobs:
-
-    # create & load artifacts
-    - job: Artifacts
-      displayName: "Artifacts"
-      pool:
-        name: $(Agent.PoolName)
-      steps:
-
-        # create artifacts
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "build artifact"
-          displayName: "Create Artifact"
-
-        # load artifacts
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: |          
-              echo "load artifact"
-          displayName: "Upload Artifact"    
-
-    # rename build
-    - job: RenameBuild
-      displayName: "Rename Build"
-      pool:
-        name: $(Agent.PoolName)
-      steps:
-
-        # rename build
-        - task: PowerShell@2
-          inputs:
-            targetType: 'inline'
-            script: | 
-              $version = Select-String -Path $(System.DefaultWorkingDirectory)/changelog.xml -Pattern '<property name="changeLogVersion" value="([^"]+)"' | ForEach-Object {if ($_ -match 'value="([^"]+)"') { $matches[1] }}         
-              $BuildName = ( '$(APPLICATION)' + " - version " + $version )
-              Write-Host "##vso[build.updatebuildnumber]$BuildName"
-          displayName: "Rename Build"
+    - task: PowerShell@2
+      displayName: "Lint Code"
+      inputs:
+        targetType: 'inline'
+        script: |          
+          echo "Deploying to DEV"
+          echo "Host: $(dev_db_host)"
+          echo "DB: $(dev_db_name)"
+          
