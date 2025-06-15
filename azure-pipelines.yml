@@ -41,7 +41,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |    
-          & "$(LIQUIBASE_DIR)\liquibase.bat" --changeLogFile=$(LQ_CHANGELOG_FILE) validate
+          & "$(LQ_DIR)\liquibase.bat" --changeLogFile=$(LQ_CHANGELOG_FILE) validate
       displayName: 'Validate Changelog'
 
     - script: |
