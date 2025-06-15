@@ -37,8 +37,11 @@ stages:
           & "$(LIQUIBASE_DIR)\liquibase.bat" --version
       displayName: 'Check Liquibase Version'
 
-    - script: |
-        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE)
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |    
+          & "$(LIQUIBASE_DIR)\liquibase.bat" --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) validate
       workingDirectory: $(Build.SourcesDirectory)/liquibase
       displayName: 'Validate Changelog'
 

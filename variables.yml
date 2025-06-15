@@ -31,3 +31,4 @@ variables:
 
 # LIQUIBASE_DIR is used in the pipeline to specific where Liauibase engine is installed
   LIQUIBASE_DIR: 'C:\Program Files\liquibase'
+  LIQUIBASE_CHANGELOG_FILE: 'changelog.xml'
