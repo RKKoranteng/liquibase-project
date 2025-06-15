@@ -31,5 +31,5 @@ variables:
 
 # The following varibales are used for liquibase engine
 # These variables are not LIQUIBASE_* environment variables
-  LQ_DIR: 'C:\Program Files\liquibase'
-  LQ_CHANGELOG_FILE: 'changelog.xml'
+  L_DIR: 'C:\Program Files\liquibase'
+  L_CHANGELOG_FILE: 'changelog.xml'
