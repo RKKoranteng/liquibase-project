@@ -1,7 +1,0 @@
-variables:
-  dev_db_host: "10.0.0.1"
-  dev_db_name: "hiramdb"
-  test_db_host: "10.0.0.2"
-  test_db_name: "hiramdb"
-  prod_db_host: "10.0.0.3"
-  prod_db_name: "hiramdb"
