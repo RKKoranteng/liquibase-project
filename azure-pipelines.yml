@@ -34,14 +34,14 @@ stages:
         targetType: 'inline'
         script: |
           Write-Host "Checking Liquibase version"
-          & "$(LQ_DIR)\liquibase.bat" --version
+          & "$(L_DIR)\liquibase.bat" --version
       displayName: 'Check Liquibase Version'
 
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
-        script: |    
-          & "$(LQ_DIR)\liquibase.bat" --changeLogFile=$(LQ_CHANGELOG_FILE) validate
+        script: | 
+          & "$(L_DIR)\liquibase.bat" --changeLogFile=$(L_CHANGELOG_FILE) validate
       displayName: 'Validate Changelog'
 
     - script: |
