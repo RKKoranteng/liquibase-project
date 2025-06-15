@@ -31,8 +31,8 @@ stages:
 
     - script: |
         echo "Checking Liquibase version"
-        $env:PATH = "$(LIQUIBASE_DIR);" + $env:PATH
-        & "$(LIQUIBASE_DIR)\liquibase.bat" --version
+        # $env:PATH = "$(LIQUIBASE_DIR);" + $env:PATH
+        write-host "$(LIQUIBASE_DIR)\liquibase.bat" --defaultsFile=liquibase.properties --version
       displayName: 'Check Liquibase Version'
 
     - script: |
