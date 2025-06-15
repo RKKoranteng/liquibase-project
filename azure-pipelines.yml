@@ -34,7 +34,7 @@ stages:
         targetType: 'inline'
         script: |
           Write-Host "Checking Liquibase version"
-          "$(LIQUIBASE_DIR)\liquibase.bat" --defaultsFile=liquibase.properties --version
+          "$(LIQUIBASE_DIR)\liquibase.bat" --defaultsFile="liquibase.properties" --version
       displayName: 'Check Liquibase Version'
 
     - script: |
