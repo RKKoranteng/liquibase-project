@@ -20,54 +20,48 @@ variables:
 - template: variables.yml
 
 stages:
-- stage: CI
+- stage: Build
+  displayName: 'Build and Validate Liquibase'
   jobs:
-  
-  - job: DB_CI
-    displayName: "Database CI"
+  - job: ValidateAndPackage
+    displayName: 'Validate and Package Changelogs'
     steps:
 
-    - task: PowerShell@2
-      displayName: "Lint Code"
+    - checkout: self
+
+    - script: |
+        echo "Checking Liquibase version"
+        liquibase --version
+      displayName: 'Check Liquibase Version'
+
+    - script: |
+        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) validate
+      workingDirectory: $(Build.SourcesDirectory)/liquibase
+      displayName: 'Validate Changelog'
+
+    - script: |
+        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) status --verbose
+      workingDirectory: $(Build.SourcesDirectory)/liquibase
+      displayName: 'Show Pending Changesets'
+
+    - script: |
+        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) updateSql > update-preview.sql
+      workingDirectory: $(Build.SourcesDirectory)/liquibase
+      displayName: 'Generate SQL Preview'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive Liquibase Changelogs'
       inputs:
-        targetType: 'inline'
-        script: |          
-          echo "linting"
+        rootFolderOrFile: '$(Build.SourcesDirectory)/liquibase'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/liquibase-release.zip'
+        replaceExistingArchive: true
 
-    - task: PowerShell@2
-      displayName: "Validate Changelog"
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Liquibase Artifact'
       inputs:
-        targetType: 'inline'
-        script: |          
-          echo "validating"    
-
-- stage: Build_Artifact
-  jobs:      
-
-  - job: BUILD_DB_ARTIFACT
-    displayName: "Build Artifact"
-    steps:
-
-    - task: PowerShell@2
-      displayName: "Remove Unwanted"
-      inputs:
-        targetType: 'inline'
-        script: |          
-          echo "removing"
-
-- stage: Publish_Artifact
-  jobs:      
-
-  - job: Publish_DB_ARTIFACT
-    displayName: "Publish Artifact"
-    steps:
-
-    - task: PowerShell@2
-      displayName: "Publish"
-      inputs:
-        targetType: 'inline'
-        script: |          
-          echo "validating"   
- 
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'liquibase-drop'
  
           
