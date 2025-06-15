@@ -42,7 +42,6 @@ stages:
         targetType: 'inline'
         script: |    
           & "$(LIQUIBASE_DIR)\liquibase.bat" --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) validate
-      workingDirectory: $(Build.SourcesDirectory)/liquibase
       displayName: 'Validate Changelog'
 
     - script: |
