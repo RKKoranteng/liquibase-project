@@ -29,6 +29,7 @@ variables:
   Database.SID: testdb
   Database.Port : 1521
 
-# LIQUIBASE_DIR is used in the pipeline to specific where Liauibase engine is installed
-  LIQUIBASE_DIR: 'C:\Program Files\liquibase'
-  LIQUIBASE_CHANGELOG_FILE: 'changelog.xml'
+# The following varibales are used for liquibase engine
+# These variables are not LIQUIBASE_* environment variables
+  LQ_DIR: 'C:\Program Files\liquibase'
+  LQ_CHANGELOG_FILE: 'changelog.xml'
