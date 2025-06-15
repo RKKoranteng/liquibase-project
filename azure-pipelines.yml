@@ -29,10 +29,12 @@ stages:
 
     - checkout: self
 
-    - script: |
-        echo "Checking Liquibase version"
-        # $env:PATH = "$(LIQUIBASE_DIR);" + $env:PATH
-        write-host "$(LIQUIBASE_DIR)\liquibase.bat" --defaultsFile=liquibase.properties --version
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "Checking Liquibase version"
+          Write-Host "$(LIQUIBASE_DIR)\liquibase.bat" --defaultsFile=liquibase.properties --version
       displayName: 'Check Liquibase Version'
 
     - script: |
