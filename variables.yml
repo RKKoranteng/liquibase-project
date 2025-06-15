@@ -28,3 +28,6 @@ variables:
   Database.Host: localhost
   Database.SID: testdb
   Database.Port : 1521
+
+# LIQUIBASE_DIR is used in the pipeline to specific where Liauibase engine is installed
+ LIQUIBASE_DIR: C:\Program Files\liquibase

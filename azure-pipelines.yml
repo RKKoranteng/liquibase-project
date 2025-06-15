@@ -31,6 +31,7 @@ stages:
 
     - script: |
         echo "Checking Liquibase version"
+        $env:PATH = "$(LIQUIBASE_DIR);" + $env:PATH
         liquibase --version
       displayName: 'Check Liquibase Version'
 
