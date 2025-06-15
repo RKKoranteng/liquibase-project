@@ -19,49 +19,41 @@ pool:
 variables:
 - template: variables.yml
 
-stages:
-- stage: Build
-  displayName: 'Build and Validate Liquibase'
-  jobs:
-  - job: ValidateAndPackage
-    displayName: 'Validate and Package Changelogs'
-    steps:
+steps:
+- checkout: self
 
-    - checkout: self
+- script: |
+    echo "Checking Liquibase version"
+    liquibase --version
+  displayName: 'Check Liquibase Version'
 
-    - script: |
-        echo "Checking Liquibase version"
-        liquibase --version
-      displayName: 'Check Liquibase Version'
+- script: |
+    liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) validate
+  workingDirectory: $(Build.SourcesDirectory)/liquibase
+  displayName: 'Validate Changelog'
 
-    - script: |
-        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) validate
-      workingDirectory: $(Build.SourcesDirectory)/liquibase
-      displayName: 'Validate Changelog'
+- script: |
+    liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) status --verbose
+  workingDirectory: $(Build.SourcesDirectory)/liquibase
+  displayName: 'Show Pending Changesets'
 
-    - script: |
-        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) status --verbose
-      workingDirectory: $(Build.SourcesDirectory)/liquibase
-      displayName: 'Show Pending Changesets'
+- script: |
+    liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) updateSql > update-preview.sql
+  workingDirectory: $(Build.SourcesDirectory)/liquibase
+  displayName: 'Generate SQL Preview Script'
 
-    - script: |
-        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) updateSql > update-preview.sql
-      workingDirectory: $(Build.SourcesDirectory)/liquibase
-      displayName: 'Generate SQL Preview'
+- task: ArchiveFiles@2
+  displayName: 'Archive Liquibase Files'
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)/liquibase'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/liquibase-release.zip'
+    replaceExistingArchive: true
 
-    - task: ArchiveFiles@2
-      displayName: 'Archive Liquibase Changelogs'
-      inputs:
-        rootFolderOrFile: '$(Build.SourcesDirectory)/liquibase'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/liquibase-release.zip'
-        replaceExistingArchive: true
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Liquibase Artifact'
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'liquibase-drop'
- 
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Liquibase Artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'liquibase-drop'
           
