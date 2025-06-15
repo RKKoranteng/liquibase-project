@@ -33,8 +33,8 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          echo "Checking Liquibase version"
-          Write-Host "$(LIQUIBASE_DIR)\liquibase.bat" --defaultsFile=liquibase.properties --version
+          Write-Host "Checking Liquibase version"
+          "$(LIQUIBASE_DIR)\liquibase.bat" --defaultsFile=liquibase.properties --version
       displayName: 'Check Liquibase Version'
 
     - script: |
