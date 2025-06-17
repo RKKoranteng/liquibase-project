@@ -29,6 +29,7 @@ stages:
 
     - checkout: self
 
+    # this task checks if liquibase is installed on the agent server
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -37,6 +38,7 @@ stages:
           & "$(L_DIR)\liquibase.bat" --version
       displayName: 'Check Liquibase Version'
 
+    # this task validates that there are errors in liquibase changelog.xml and reference changesets/sql files
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -50,9 +52,16 @@ stages:
             validate
       displayName: 'Validate Changelog'
 
-    - script: |
-        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) status --verbose
-      workingDirectory: $(Build.SourcesDirectory)/liquibase
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: | 
+          & "$(L_DIR)\liquibase.bat" `
+            --changeLogFile=$(L_CHANGELOG_FILE) `
+            --url=$URL `
+            --username="$(username)" `
+            --password="$(password)" `
+            status --verbose
       displayName: 'Show Pending Changesets'
 
     - script: |
