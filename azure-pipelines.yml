@@ -78,7 +78,7 @@ stages:
             --username="$(username)" `
             --password="$(password)" `
             updateSql > update-preview.sql
-      workingDirectory: '$(Build.SourcesDirectory)'
+        workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate SQL Preview'
 
     - task: ArchiveFiles@2
