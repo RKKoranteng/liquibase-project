@@ -33,3 +33,8 @@ variables:
 # These variables are not LIQUIBASE_* environment variables
   L_DIR: 'C:\Program Files\liquibase'
   L_CHANGELOG_FILE: 'changelog.xml'
+
+# LIQUIBASE_* environment variables
+ # LIQUIBASE_DB_USER uses pipeline variable $(Oracle.Username)
+ # LIQUIBASE_DB_PASSWORD uses pipeline variable $(Oracle.Password)
+ 
