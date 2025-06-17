@@ -11,7 +11,7 @@
 
 appendCommitMessageToRunName: false
   
-name: $(Application.Name)-$(Build.BuildId)-CI
+name: $(Database.SID)-$(Build.BuildId)-CI
 
 pool:
   name: $(Agent.PoolName)
@@ -81,6 +81,41 @@ stages:
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate SQL Preview'
 
+    # this task reviews the SQL statements that will be executed against the database before actually applying them
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: | 
+          $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+          & "$(L_DIR)\liquibase.bat" `
+            --changeLogFile=$(L_CHANGELOG_FILE) `
+            --url=$URL `
+            --username="$(username)" `
+            --password="$(password)" `
+            rollbackSql > rollback-preview.sql
+        workingDirectory: $(Build.SourcesDirectory)
+      displayName: 'Generate Rollback SQL Preview'      
+
+    # this task records metadata like build number, commit hash, timestamp, and changelog ID for traceability.
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: | 
+          $metadata = @{
+            buildNumber = "$(Build.BuildNumber)"
+            buildId = "$(Build.BuildId)"
+            sourceBranch = "$(Build.SourceBranch)"
+            commitId = "$(Build.SourceVersion)"
+            buildTime = (Get-Date).ToString("s")
+            changelogFile = "$(L_CHANGELOG_FILE)"
+            environment = "$(Build.SourceBranchName)"
+          }
+          $json = $metadata | ConvertTo-Json -Depth 2
+          $json | Out-File -FilePath "$(Build.SourcesDirectory)\build-metadata.json" -Encoding utf8
+        workingDirectory: $(Build.SourcesDirectory)
+      displayName: 'Generate Build Metadata'
+
+    # this task builds database ci artifact
     - task: PowerShell@2
       displayName: 'Build Artifact'
       inputs:
@@ -89,7 +124,7 @@ stages:
           Copy-Item `
             -Path $(Build.SourcesDirectory)\* `
             -Destination $(Build.ArtifactStagingDirectory) `
-            -Exclude "LICENSE", "lib", "CHANGELOG.md" `
+            -Exclude "LICENSE", "lib", "CHANGELOG.md", "azure-pipelines.yml" `
             -Recurse
 
 #    - task: ArchiveFiles@2
@@ -101,6 +136,7 @@ stages:
 #        archiveFile: '$(Build.ArtifactStagingDirectory)/liquibase-release.zip'
 #        replaceExistingArchive: true
 
+    # this task publishes database ci artifact
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
       inputs:
