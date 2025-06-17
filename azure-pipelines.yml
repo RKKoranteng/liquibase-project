@@ -44,8 +44,8 @@ stages:
           $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
           & "$(L_DIR)\liquibase.bat" --changeLogFile=$(L_CHANGELOG_FILE) --url=$URL validate
       env:
-        username: $(username)
-        password: $(password)
+        username: "$(username)"
+        password: "$(password)"
       displayName: 'Validate Changelog'
 
     - script: |
