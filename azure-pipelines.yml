@@ -42,11 +42,11 @@ stages:
         targetType: 'inline'
         script: | 
           $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
-          & "$(L_DIR)\liquibase.bat" 
-            --changeLogFile=$(L_CHANGELOG_FILE) 
-            --url=$URL
-            --username="$(username)" 
-            --password="$(password)"
+          & "$(L_DIR)\liquibase.bat" `
+            --changeLogFile=$(L_CHANGELOG_FILE) `
+            --url=$URL `
+            --username="$(username)" `
+            --password="$(password)" `
             validate
       displayName: 'Validate Changelog'
 
