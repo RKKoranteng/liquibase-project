@@ -86,8 +86,11 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          Copy-Item -Path $(Build.SourcesDirectory)\update-preview.sql -Destination $(Build.ArtifactStagingDirectory)
-          Copy-Item -Path $(Build.SourcesDirectory)\scripts -Destination $(Build.ArtifactStagingDirectory) -Recurse
+          Copy-Item `
+            -Path $(Build.SourcesDirectory)\* `
+            -Destination $(Build.ArtifactStagingDirectory) `
+            -Exclude "LICENSE", "lib", "CHANGELOG.md" `
+            -Recurse
 
 #    - task: ArchiveFiles@2
 #      displayName: 'Archive Liquibase Changelogs'
