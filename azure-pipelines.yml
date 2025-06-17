@@ -92,7 +92,7 @@ stages:
             --url=$URL `
             --username="$(username)" `
             --password="$(password)" `
-            rollbackSql > rollback-preview.sql
+            rollbackSql 1 > rollback-preview.sql
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate Rollback SQL Preview'      
 
