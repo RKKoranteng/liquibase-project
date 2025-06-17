@@ -9,16 +9,20 @@
 
     <property name="changeLogVersion" value="0.0.2" />
 
-    <changeSet author="Richard Koranteng" id="create-table:emp">
+    <changeSet author="Richard Koranteng" id="create_table:emp">
         <sqlFile 
             path="scripts\create_table_emp.sql"
             relativeToChangelogFile="true"
             endDelimiter=";"
             splitStatements="true"
             stripComments="true"/>
+            
         <rollback>
             <sqlFile path="scripts\drop_table_emp.sql" 
-                endDelimiter="/"/>
+                relativeToChangelogFile="true"
+                endDelimiter=";"
+                splitStatements="true"
+                stripComments="true"/>
         </rollback>
     </changeSet>
 
