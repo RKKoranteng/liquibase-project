@@ -81,19 +81,26 @@ stages:
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate SQL Preview'
 
-    - task: ArchiveFiles@2
-      displayName: 'Archive Liquibase Changelogs'
+    - task: PowerShell@2
+      displayName: 'Build Artifact'
       inputs:
-        rootFolderOrFile: '$(Build.SourcesDirectory)'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/liquibase-release.zip'
-        replaceExistingArchive: true
+        targetType: 'inline'
+        script: |
+          Copy-Item -Path $(Build.SourcesDirectory)\update-preview.sql -Destination $(Build.ArtifactStagingDirectory)
+          Copy-Item -Path $(Build.SourcesDirectory)\scripts -Destination $(Build.ArtifactStagingDirectory) -Recurse
+
+#    - task: ArchiveFiles@2
+#      displayName: 'Archive Liquibase Changelogs'
+#      inputs:
+#        rootFolderOrFile: '$(Build.SourcesDirectory)'
+#        includeRootFolder: false
+#        archiveType: 'zip'
+#        archiveFile: '$(Build.ArtifactStagingDirectory)/liquibase-release.zip'
+#        replaceExistingArchive: true
 
     - task: PublishBuildArtifacts@1
-      displayName: 'Publish Liquibase Artifact'
+      displayName: 'Publish Artifact'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'liquibase-drop'
- 
-          
+        ArtifactName: 'db-ci-artifact'
+        publishLocation: 'Container'
