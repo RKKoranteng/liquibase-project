@@ -38,7 +38,7 @@ stages:
           & "$(L_DIR)\liquibase.bat" --version
       displayName: 'Check Liquibase Version'
 
-    # this task validates that there are errors in liquibase changelog.xml and reference changesets/sql files
+    # this task validates that there are errors in liquibase changelog.xml and referenced changesets
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -52,6 +52,7 @@ stages:
             validate
       displayName: 'Validate Changelog'
 
+    # this task states the number of undeployed changesets
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -65,8 +66,18 @@ stages:
             status --verbose
       displayName: 'Show Pending Changesets'
 
-    - script: |
-        liquibase --changeLogFile=$(LIQUIBASE_CHANGELOG_FILE) updateSql > update-preview.sql
+    # this task reviews the SQL statements that will be executed against the database before actually applying them
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: | 
+          $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+          & "$(L_DIR)\liquibase.bat" `
+            --changeLogFile=$(L_CHANGELOG_FILE) `
+            --url=$URL `
+            --username="$(username)" `
+            --password="$(password)" `
+            updateSql > update-preview.sql
       workingDirectory: $(Build.SourcesDirectory)/liquibase
       displayName: 'Generate SQL Preview'
 
