@@ -78,13 +78,13 @@ stages:
             --username="$(username)" `
             --password="$(password)" `
             updateSql > update-preview.sql
-        workingDirectory: $(Build.SourcesDirectory)/liquibase-project
+        workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate SQL Preview'
 
     - task: ArchiveFiles@2
       displayName: 'Archive Liquibase Changelogs'
       inputs:
-        rootFolderOrFile: '$(Build.SourcesDirectory)/liquibase-project'
+        rootFolderOrFile: '$(Build.SourcesDirectory)'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/liquibase-release.zip'
