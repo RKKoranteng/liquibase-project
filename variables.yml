@@ -26,7 +26,7 @@ variables:
 # The following variables are used in liquibase.properties
 # and also represents db connection string
   Database.Host: localhost
-  Database.SID: testdb
+  Database.SID: orcl
   Database.Port : 1521
 
 # The following varibales are used for liquibase engine
