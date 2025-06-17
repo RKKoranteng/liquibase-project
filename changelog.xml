@@ -16,7 +16,7 @@
             endDelimiter=";"
             splitStatements="true"
             stripComments="true"/>
-            
+
         <rollback>
             <sqlFile path="scripts\drop_table_emp.sql" 
                 relativeToChangelogFile="true"
