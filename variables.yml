@@ -34,9 +34,9 @@ variables:
   L_DIR: 'C:\Program Files\liquibase'
   L_CHANGELOG_FILE: 'changelog.xml'
 
-# username is used in liquibase.properties and references ADO variable $(Oracle.Username)
+# username is used in liquibase.properties and references ADO variable $(username)
  # username
 
-# pasword is used in liquibase.properties and references ADO variable $(Oracle.Password) 
+# pasword is used in liquibase.properties and references ADO variable $(password) 
  # password
  
