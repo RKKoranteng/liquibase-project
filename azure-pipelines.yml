@@ -106,9 +106,10 @@ stages:
             /
           "@
 
+          
+          $SQL_FILE = "$(Build.SourcesDirectory)\check_deploy.sql"
           $CHANGELOG_TBL | Out-File -FilePath $(Build.SourcesDirectory)\check_changelog.sql
-
-          $CHANGELOG_TBL_RESULT = & sqlplus -s "$(username)/$(password)@//$(Database.Host):$(Database.Port)/$(Database.SID)" @"$(Build.SourcesDirectory)\check_changelog.sql"
+          $CHANGELOG_TBL_RESULT = & sqlplus -s "$(username)/$(password)@//$(Database.Host):$(Database.Port)/$(Database.SID)" @"$SQL_FILE"
 
           if ( $CHANGELOG_TBL_RESULT -match "0") {
             Write-Host "##vso[task.setvariable variable=shouldRollbackPreview]false"
