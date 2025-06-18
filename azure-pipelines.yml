@@ -115,6 +115,7 @@ stages:
           } else {
             Write-Host "##vso[task.setvariable variable=shouldRollbackPreview]true"
           }
+      displayName: 'Check Previous Deployments'
 
     # this task reviews the SQL statements that will be executed against the database before actually applying them
     # this task only runs if there's been a previous 'liquibase update' (deployment)
