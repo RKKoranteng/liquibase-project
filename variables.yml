@@ -34,6 +34,9 @@ variables:
   L_DIR: 'C:\Program Files\liquibase'
   L_CHANGELOG_FILE: 'changelog.xml'
 
+# Oracle.Home is used in the pipeline to call utilities from oracle software bin
+  Oracle.Home: 'C:\app\oracle\product\19'
+
 # username is used in liquibase.properties and references ADO variable $(username)
  # username
 
