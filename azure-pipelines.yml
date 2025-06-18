@@ -81,7 +81,43 @@ stages:
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate SQL Preview'
 
+    # this task checks for previous deployments
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: | 
+          $CHANGELOG_TBL = @"
+            DECLARE
+              V_COUNT INTEGER := 0;
+              V_EXISTS INTEGER := 0;
+            BEGIN
+              SELECT COUNT(*) INTO V_EXISTS FROM USER_TABLES WHERE TABLE_NAME='DATABASECHANGELOG' ;
+
+              IF V_EXISTS > 0 THEN
+                EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM DATABASECHANGELOG INTO V_COUNT;
+              ENF IF;
+
+              IF V_COUNT > 0 THEN
+                DBMS_OUTPUT.PUT_LINE('EXISTS')
+              ELSE
+                DBMS_OUTPUT.PUT_LINE('EMPTY_OR_NOT_EXISTS');
+              END IF;
+            END;
+            /
+          "@
+
+          $CHANGELOG_TBL | Out-File -FilePath $(Build.SourcesDirectory)\check_changelog.sql
+
+          $CHANGELOG_TBL_RESULT = & sqlplus -s "$(username)/$(password)@//$(Database.Host):$(Database.Port)/$(Database.SID)" @"$(Build.SourcesDirectory)\check_changelog.sql"
+
+          if ( $CHANGELOG_TBL_RESULT -match "0") {
+            Write-Host "##vso[task.setvariable variable=shouldRollbackPreview]false"
+          } else {
+            Write-Host "##vso[task.setvariable variable=shouldRollbackPreview]true"
+          }
+
     # this task reviews the SQL statements that will be executed against the database before actually applying them
+    # this task only runs if there's been a previous 'liquibase update' (deployment)
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -94,7 +130,8 @@ stages:
             --password="$(password)" `
             rollbackSql 1 > rollback-preview.sql
         workingDirectory: $(Build.SourcesDirectory)
-      displayName: 'Generate Rollback SQL Preview'      
+      displayName: 'Generate Rollback SQL Preview'
+      condition: eq(variables['shouldRollbackPreview'], 'true')     
 
     # this task records metadata like build number, commit hash, timestamp, and changelog ID for traceability.
     - task: PowerShell@2
