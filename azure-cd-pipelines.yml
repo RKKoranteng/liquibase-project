@@ -44,11 +44,7 @@ stages:
       runOnce:
         deploy:
           steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: db-ci-artifact
-              path: $(Pipeline.Workspace)
-
+          
           - task: PowerShell@2
             displayName: 'Liquibase Update'
             inputs:
