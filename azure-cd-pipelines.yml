@@ -1,0 +1,63 @@
+# @name: azure-cd-pipelines.yml
+# @description: ADO CD pipeline for Oracle DB deployment using Liquibase
+# @author: Richard Koranteng (https://rkkoranteng.com)
+# @changes: refer to CHANGELOG.md
+
+#trigger:
+#  branches:
+#    include:
+#      - main
+#  paths:
+#    include:
+#      - changelog.xml
+
+trigger: none
+
+appendCommitMessageToRunName: false
+  
+name: $(Database.SID)-$(Build.BuildId)-CD
+
+pool:
+  name: $(Agent.PoolName)
+
+variables:
+- template: variables.yml
+
+resources:
+  pipelines:
+    - pipeline: ciBuild          
+      source: Database_CI
+      trigger:
+        branches:
+          include:
+            - main
+
+stages:
+# deploy to Dev
+- stage: Dev
+  displayName: 'Deploy to Dev'
+  jobs:
+  - job: DeployDev
+    environment: 'dev'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        source: 'specific'
+        project: '$(System.TeamProject)'
+        pipeline: 'Database_CI'
+        artifact: 'db-ci-artifact'
+        targetPath: '$(Build.SourcesDirectory)'
+
+    - task: PowerShell@2
+      displayName: 'Liquibase Update - Dev'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $url = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+          & "$(L_DIR)\liquibase.bat" `
+            --changeLogFile=$(L_CHANGELOG_FILE) `
+            --url=$url `
+            --username="$(username)" `
+            --password="$(password)" `
+            update
+        workingDirectory: '$(Build.SourcesDirectory)'
