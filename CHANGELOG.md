@@ -1,7 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-### Version 2025.06
+### Version 2025.06.19
+- 2025.06.19 : rename yml to azure-ci-pipelines.yml
 - 2025.06.18 : stable ci pipeline
 - 2025.06.13 : fix: stage dev job db-availability has invalid name
 - 2025.06.13 : change agent from 'Azure Pipelines' to 'mylocal'
