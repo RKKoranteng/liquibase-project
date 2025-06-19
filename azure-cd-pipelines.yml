@@ -45,6 +45,15 @@ stages:
         deploy:
           steps:
 
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              source: specific
+              project: $(System.TeamProject)
+              pipeline: Database_CI
+              runVersion: latest
+              artifact: liquibase-artifacts
+              path: $(Pipeline.Workspace)
+
           - task: PowerShell@2
             displayName: 'Liquibase Update'
             inputs:
