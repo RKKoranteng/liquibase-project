@@ -33,31 +33,32 @@ resources:
             - main
 
 stages:
+
 # deploy to Dev
 - stage: Dev
   displayName: 'Deploy to Dev'
   jobs:
-  - job: DeployDev
+  - deployment: Deploy_Dev
     environment: 'dev'
-    steps:
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        source: 'specific'
-        project: '$(System.TeamProject)'
-        pipeline: 'Database_CI'
-        artifact: 'db-ci-artifact'
-        targetPath: '$(Build.SourcesDirectory)'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: liquibase-artifacts
+              path: $(Pipeline.Workspace)
 
-    - task: PowerShell@2
-      displayName: 'Liquibase Update - Dev'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $url = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
-          & "$(L_DIR)\liquibase.bat" `
-            --changeLogFile=$(L_CHANGELOG_FILE) `
-            --url=$url `
-            --username="$(username)" `
-            --password="$(password)" `
-            update
-        workingDirectory: '$(Build.SourcesDirectory)'
+          - task: PowerShell@2
+            displayName: 'Liquibase Update'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $url = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+                & "C:\Program Files\liquibase\liquibase.bat" `
+                  --changeLogFile=changelog.xml `
+                  --url=$url `
+                  --username=$(username) `
+                  --password=$(password) `
+                  update
+            workingDirectory: $(Pipeline.Workspace)
