@@ -42,4 +42,9 @@ variables:
 
 # pasword is used in liquibase.properties and references ADO variable $(password) 
  # password
+
+# CD pipeline variables
+ # dev.usermame
+ # dev.password
+
  
