@@ -3,4 +3,4 @@
 --
 -- 2025.06.17 : drop emp statement
 
-DROP TABLE USERS.EMP;
+DROP TABLE DEMO.EMP;
