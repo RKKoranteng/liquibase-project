@@ -1,5 +1,7 @@
-# @name: azure-pipelines.yml
-# @description: ADO pipeline
+# @name: azure-ci-pipelines.yml
+# @description: ADO CI pipeline for Oracle DB deployment using Liquibase
+# @author: Richard Koranteng (https://rkkoranteng.com)
+# @changes: refer to CHANGELOG.md
 
 #trigger:
 #  branches:
