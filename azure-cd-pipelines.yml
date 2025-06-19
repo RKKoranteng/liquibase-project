@@ -25,7 +25,7 @@ variables:
 
 resources:
   pipelines:
-    - pipeline: ciBuild          
+    - pipeline: DB_CI          
       source: Database_CI
       trigger:
         branches:
@@ -51,7 +51,7 @@ stages:
               project: $(System.TeamProject)
               pipeline: Database_CI
               runVersion: latest
-              artifact: liquibase-artifacts
+              artifact: db-ci-artifact
               path: $(Pipeline.Workspace)
 
           - task: PowerShell@2
