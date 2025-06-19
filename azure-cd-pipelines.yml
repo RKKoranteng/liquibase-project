@@ -46,7 +46,7 @@ stages:
           steps:
           - task: DownloadPipelineArtifact@2
             inputs:
-              artifact: liquibase-artifacts
+              artifact: db-ci-artifact
               path: $(Pipeline.Workspace)
 
           - task: PowerShell@2
@@ -54,11 +54,11 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                $url = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
-                & "C:\Program Files\liquibase\liquibase.bat" `
-                  --changeLogFile=changelog.xml `
-                  --url=$url `
-                  --username=$(username) `
-                  --password=$(password) `
+                $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+                & "$(L_DIR)\liquibase.bat" `
+                  --changeLogFile=$(L_CHANGELOG_FILE) `
+                  --url=$URL `
+                  --username="$(username)" `
+                  --password="$(password)" `
                   update
-            workingDirectory: $(Pipeline.Workspace)
+              workingDirectory: $(Pipeline.Workspace)
