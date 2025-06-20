@@ -67,3 +67,39 @@ stages:
                   --password="$(dev.password)" `
                   update
               workingDirectory: $(Pipeline.Workspace)
+
+# deploy to QA
+- stage: QA
+  displayName: 'Deploy to QA'
+  dependsOn: dev
+  condition: succeeded()
+  jobs:
+  - deployment: Deploy_QA
+    environment: 'qa'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              source: specific
+              project: $(System.TeamProject)
+              pipeline: Database_CI
+              runVersion: latest
+              artifact: db-ci-artifact
+              path: $(Pipeline.Workspace)
+
+          - task: PowerShell@2
+            displayName: 'Liquibase Update'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+                & "$(L_DIR)\liquibase.bat" `
+                  --changeLogFile=$(L_CHANGELOG_FILE) `
+                  --url=$URL `
+                  --username="$(dev.username)" `
+                  --password="$(dev.password)" `
+                  update
+              workingDirectory: $(Pipeline.Workspace)              
