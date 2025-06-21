@@ -21,7 +21,11 @@ pool:
 variables:
 - template: variables.yml
 
+
 stages:
+
+# build
+# is this code valid and buildable
 - stage: CI
   displayName: 'Build'
   jobs:
@@ -37,7 +41,7 @@ stages:
         targetType: 'inline'
         script: |
           Write-Host "Checking Liquibase version"
-          & "$(L_DIR)\liquibase.bat" --version
+          & "$(L_DIR)\liquibase.bat" --version > ci-liquibase-version.log
       displayName: 'Check Liquibase Version'
 
     # this task validates that there are errors in liquibase changelog.xml and referenced changesets
@@ -51,7 +55,7 @@ stages:
             --url=$URL `
             --username="$(username)" `
             --password="$(password)" `
-            validate
+            validate > ci-validate-changeset.log
       displayName: 'Validate Changelog'
 
     # this task states the number of undeployed changesets
@@ -65,7 +69,7 @@ stages:
             --url=$URL `
             --username="$(username)" `
             --password="$(password)" `
-            status --verbose
+            status --verbose > ci-undeployed-changes.log
       displayName: 'Show Pending Changesets'
 
     # this task reviews the SQL statements that will be executed against the database before actually applying them
@@ -79,7 +83,7 @@ stages:
             --url=$URL `
             --username="$(username)" `
             --password="$(password)" `
-            updateSql > update-preview.sql
+            updateSql > ci-update-preview.sql
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate SQL Preview'
 
@@ -131,7 +135,7 @@ stages:
             --url=$URL `
             --username="$(username)" `
             --password="$(password)" `
-            rollbackSql 1 > rollback-preview.sql
+            rollbackSql 1 > ci-rollback-preview.sql
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate Rollback SQL Preview'
       condition: eq(variables['shouldRollbackPreview'], 'true')     

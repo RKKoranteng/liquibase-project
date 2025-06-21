@@ -34,9 +34,76 @@ resources:
 
 stages:
 
+# test
+# is this safe to deploy in our environments
+- stage: testing
+  displayName: 'Tests'
+  jobs:
+  - deployment: Deploy_Staging
+    environment: 'staging'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              source: specific
+              project: $(System.TeamProject)
+              pipeline: Database_CI
+              runVersion: latest
+              artifact: db-ci-artifact
+              path: $(Pipeline.Workspace)
+
+          # this task reviews the SQL statements that will be executed against the database before actually applying them
+          - task: PowerShell@2
+            inputs:
+              targetType: 'inline'
+              script: | 
+                $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+                & "$(L_DIR)\liquibase.bat" `
+                  --changeLogFile=$(L_CHANGELOG_FILE) `
+                  --url=$URL `
+                  --username="$(dev.username)" `
+                  --password="$(dev.password)" `
+                  updateSql > cd-update-preview.sql
+            displayName: 'Generate SQL Preview'
+            
+          # this task reviews the SQL statements that will be executed against the database before actually applying them
+          # this task checks dev environment
+          - task: PowerShell@2
+            inputs:
+              targetType: 'inline'
+              script: | 
+                $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+                & "$(L_DIR)\liquibase.bat" `
+                  --changeLogFile=$(L_CHANGELOG_FILE) `
+                  --url=$URL `
+                  --username="$(dev.username)" `
+                  --password="$(dev.password)" `
+                  rollbackSql 1 > cd-rollback-preview.sql
+              workingDirectory: $(Build.SourcesDirectory)
+            displayName: 'Generate Rollback SQL Preview'
+            
+          # this task states the number of undeployed changesets
+          - task: PowerShell@2
+            inputs:
+              targetType: 'inline'
+              script: | 
+                $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+                & "$(L_DIR)\liquibase.bat" `
+                  --changeLogFile=$(L_CHANGELOG_FILE) `
+                  --url=$URL `
+                  --username="$(dev.username)" `
+                  --password="$(dev.password)" `
+                  status --verbose > cd-undeployed-changes.log
+            displayName: 'Show Pending Changesets'
+
 # deploy to staging
-- stage: Staging
+- stage: staging
   displayName: 'Deploy to Staging'
+  dependsOn: testing
+  condition: succeeded()
   jobs:
   - deployment: Deploy_Staging
     environment: 'staging'
@@ -69,7 +136,7 @@ stages:
               workingDirectory: $(Pipeline.Workspace)
 
 # deploy to prod
-- stage: Prod
+- stage: prod
   displayName: 'Deploy to Prod'
   dependsOn: staging
   condition: succeeded()
@@ -102,4 +169,4 @@ stages:
                   --username="$(prod.username)" `
                   --password="$(prod.password)" `
                   update
-              workingDirectory: $(Pipeline.Workspace)              
+              workingDirectory: $(Pipeline.Workspace)
