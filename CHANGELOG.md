@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+### To-do
+- add dev deployment task to CD pipeline before test stage
+- add tag task to CD pipeline after dev deployment
+
 ### Version 2025.06.19
 - 2025.06.19 : develop ado cd pipeline for liquibase project
 
