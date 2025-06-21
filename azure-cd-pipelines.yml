@@ -67,6 +67,7 @@ stages:
                   --username="$(dev.username)" `
                   --password="$(dev.password)" `
                   updateSql > cd-update-preview.sql
+              workingDirectory: $(Pipeline.Workspace)
             displayName: 'Generate SQL Preview'
             
           # this task reviews the SQL statements that will be executed against the database before actually applying them
@@ -82,7 +83,7 @@ stages:
                   --username="$(dev.username)" `
                   --password="$(dev.password)" `
                   rollbackSql 1 > cd-rollback-preview.sql
-              workingDirectory: $(Build.SourcesDirectory)
+              workingDirectory: $(Pipeline.Workspace)
             displayName: 'Generate Rollback SQL Preview'
             
           # this task states the number of undeployed changesets
@@ -97,6 +98,7 @@ stages:
                   --username="$(dev.username)" `
                   --password="$(dev.password)" `
                   status --verbose > cd-undeployed-changes.log
+              workingDirectory: $(Pipeline.Workspace)
             displayName: 'Show Pending Changesets'
 
 # deploy to staging
