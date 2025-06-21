@@ -34,12 +34,12 @@ resources:
 
 stages:
 
-# deploy to Dev
-- stage: Dev
-  displayName: 'Deploy to Dev'
+# deploy to staging
+- stage: Staging
+  displayName: 'Deploy to Staging'
   jobs:
-  - deployment: Deploy_Dev
-    environment: 'dev'
+  - deployment: Deploy_Staging
+    environment: 'staging'
     strategy:
       runOnce:
         deploy:
@@ -68,14 +68,14 @@ stages:
                   update
               workingDirectory: $(Pipeline.Workspace)
 
-# deploy to QA
-- stage: QA
-  displayName: 'Deploy to QA'
-  dependsOn: dev
+# deploy to prod
+- stage: Prod
+  displayName: 'Deploy to Prod'
+  dependsOn: staging
   condition: succeeded()
   jobs:
-  - deployment: Deploy_QA
-    environment: 'qa'
+  - deployment: Deploy_Prod
+    environment: 'prod'
     strategy:
       runOnce:
         deploy:
@@ -95,11 +95,11 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+                $URL = "jdbc:oracle:thin:@//$(Prod.Host):$(Prod.Port)/$(Prod.SID)"
                 & "$(L_DIR)\liquibase.bat" `
                   --changeLogFile=$(L_CHANGELOG_FILE) `
                   --url=$URL `
-                  --username="$(dev.username)" `
-                  --password="$(dev.password)" `
+                  --username="$(prod.username)" `
+                  --password="$(prod.password)" `
                   update
               workingDirectory: $(Pipeline.Workspace)              

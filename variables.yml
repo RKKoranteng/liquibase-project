@@ -28,6 +28,10 @@ variables:
   Database.Host: localhost
   Database.SID: orcl
   Database.Port : 1521
+  
+  Prod.Host: localhost
+  Prod.SID: orcl
+  Prod.Port: 1521
 
 # The following varibales are used for liquibase engine
 # These variables are not LIQUIBASE_* environment variables
