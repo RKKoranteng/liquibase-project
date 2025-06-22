@@ -39,7 +39,7 @@ stages:
 - stage: testing
   displayName: 'Tests'
   jobs:
-  - deployment: Deploy_Staging
+  - deployment: Tests
     environment: 'staging'
     strategy:
       runOnce:
