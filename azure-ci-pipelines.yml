@@ -138,7 +138,40 @@ stages:
             rollbackSql 1 > ci-rollback-preview.sql
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate Rollback SQL Preview'
-      condition: eq(variables['shouldRollbackPreview'], 'true')     
+      condition: eq(variables['shouldRollbackPreview'], 'true')
+
+    - task: PowerShell@2
+      displayName: 'Dev - Liquibase Update'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $URL = "jdbc:oracle:thin:@//$(Prod.Host):$(Prod.Port)/$(Prod.SID)"
+          & "$(L_DIR)\liquibase.bat" `
+            --changeLogFile=$(L_CHANGELOG_FILE) `
+            --url=$URL `
+            --username="$(username)" `
+            --password="$(password)" `
+            update
+        workingDirectory: $(Build.SourcesDirectory)
+
+    - task: PowerShell@2
+      displayName: 'Liquibase Tag'
+      inputs:
+        targetType: 'inline'
+        script: |
+          [xml]$changelog = Get-Content "$(Build.SourcesDirectory)\changelog.xml"
+          $versionNode = $changelog.changeLog.property | Where-Object { $_.name -eq "changeLogVersion" }
+          $tag = $versionNode.value
+          Write-Host "Using changelog version: $tag"
+
+          $URL = "jdbc:oracle:thin:@//$(Prod.Host):$(Prod.Port)/$(Prod.SID)"
+          & "$(L_DIR)\liquibase.bat" `
+            --changeLogFile=$(L_CHANGELOG_FILE) `
+            --url=$URL `
+            --username="$(username)" `
+            --password="$(password)" `
+            tag $tag
+        workingDirectory: $(Build.SourcesDirectory) 
 
     # this task records metadata like build number, commit hash, timestamp, and changelog ID for traceability.
     - task: PowerShell@2

@@ -76,13 +76,18 @@ stages:
             inputs:
               targetType: 'inline'
               script: | 
+                [xml]$changelog = Get-Content "$(Pipeline.Workspace)\changelog.xml"
+                $versionNode = $changelog.changeLog.property | Where-Object { $_.name -eq "changeLogVersion" }
+                $tag = $versionNode.value
+                Write-Host "Using changelog version: $tag"
+
                 $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
                 & "$(L_DIR)\liquibase.bat" `
                   --changeLogFile=$(L_CHANGELOG_FILE) `
                   --url=$URL `
                   --username="$(dev.username)" `
                   --password="$(dev.password)" `
-                  rollbackSql 1 > cd-rollback-preview.sql
+                  rollbackSql $tag > cd-rollback-preview.sql
               workingDirectory: $(Pipeline.Workspace)
             displayName: 'Generate Rollback SQL Preview'
             
