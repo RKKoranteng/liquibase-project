@@ -77,7 +77,7 @@ stages:
               targetType: 'inline'
               script: | 
                 [xml]$changelog = Get-Content "$(Pipeline.Workspace)\changelog.xml"
-                $versionNode = $changelog.changeLog.property | Where-Object { $_.name -eq "changeLogVersion" }
+                $versionNode = $changelog.databaseChangeLog.property | Where-Object { $_.name -eq "changeLogVersion" }
                 $tag = $versionNode.value
                 Write-Host "Using changelog version: $tag"
 
