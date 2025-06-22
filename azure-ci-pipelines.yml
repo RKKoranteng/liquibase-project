@@ -102,12 +102,19 @@ stages:
           $tag = $versionNode.value
           Write-Host "Using changelog version: $tag"
 
-          $sql = "SET HEADING OFF FEEDBACK OFF; SELECT COUNT(*) FROM DATABASECHANGELOG WHERE TAG = '$tag'; EXIT;"
-          $sql | Out-File -FilePath $(Build.SourcesDirectory)\check_tag.sql
-          $CHANGELOG_TBL_RESULT = & "$(Oracle.Home)\bin\sqlplus" -s "$(username)/$(password)@//$(Database.Host):$(Database.Port)/$(Database.SID)" "$(Build.SourcesDirectory)\check_tag.sql"
-          $exists = $result -match '^[1-9]'
+          $sqlFile = $(Build.SourcesDirectory)\check_tag.sql
 
-          if ($exists) {
+          @"
+            SET HEADING OFF
+            SET FEEDBACK OFF
+            SET VERIFY OFF
+            SELECT COUNT(*) FROM DATABASECHANGELOG WHERE TAG = '$tag';
+            EXIT
+          "@ | Out-File -Encoding ascii $sqlFile
+
+          $CHANGELOG_TBL_RESULT = & "$(Oracle.Home)\bin\sqlplus" -s "$(username)/$(password)@//$(Database.Host):$(Database.Port)/$(Database.SID)" "$(Build.SourcesDirectory)\check_tag.sql"
+    
+          if ($result.Trim() -match '^[1-9]') {
             Write-Host "Tag $tag exists. Generating rollback SQL..."
             $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
             & "$(L_DIR)\liquibase.bat" `
