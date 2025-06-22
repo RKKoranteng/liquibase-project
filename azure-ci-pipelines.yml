@@ -102,7 +102,7 @@ stages:
           $tag = $versionNode.value
           Write-Host "Using changelog version: $tag"
 
-          $sqlFile = $(Build.SourcesDirectory)\check_tag.sql
+          $sqlFile = "$(Build.SourcesDirectory)\check_tag.sql"
 
           @"
             SET HEADING OFF
