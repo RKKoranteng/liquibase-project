@@ -141,7 +141,7 @@ stages:
       condition: eq(variables['shouldRollbackPreview'], 'true')
 
     - task: PowerShell@2
-      displayName: 'Dev - Liquibase Update'
+      displayName: 'Deploy to Dev'
       inputs:
         targetType: 'inline'
         script: |
@@ -160,7 +160,7 @@ stages:
         targetType: 'inline'
         script: |
           [xml]$changelog = Get-Content "$(Build.SourcesDirectory)\changelog.xml"
-          $versionNode = $changelog.changeLog.property | Where-Object { $_.name -eq "changeLogVersion" }
+          $versionNode = $changelog.databaseChangeLog.property | Where-Object { $_.name -eq "changeLogVersion" }
           $tag = $versionNode.value
           Write-Host "Using changelog version: $tag"
 
