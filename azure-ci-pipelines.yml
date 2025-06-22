@@ -45,6 +45,7 @@ stages:
       displayName: 'Check Liquibase Version'
 
     # this task validates that there are errors in liquibase changelog.xml and referenced changesets
+    # check changelog structure
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -59,6 +60,7 @@ stages:
       displayName: 'Validate Changelog'
 
     # this task states the number of undeployed changesets
+    # chec pending changes
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -73,6 +75,7 @@ stages:
       displayName: 'Show Pending Changesets'
 
     # this task reviews the SQL statements that will be executed against the database before actually applying them
+    # preview changes
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -87,59 +90,39 @@ stages:
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate SQL Preview'
 
-    # this task checks for previous deployments
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'
-        script: | 
-          $CHANGELOG_TBL = @"
-            DECLARE
-              V_COUNT INTEGER := 0;
-              V_EXISTS INTEGER := 0;
-            BEGIN
-              SELECT COUNT(*) INTO V_EXISTS FROM USER_TABLES WHERE TABLE_NAME='DATABASECHANGELOG' ;
-
-              IF V_EXISTS > 0 THEN
-                EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM DATABASECHANGELOG INTO V_COUNT;
-              ENF IF;
-
-              IF V_COUNT > 0 THEN
-                DBMS_OUTPUT.PUT_LINE('EXISTS')
-              ELSE
-                DBMS_OUTPUT.PUT_LINE('EMPTY_OR_NOT_EXISTS');
-              END IF;
-            END;
-            /
-          "@
-
-          
-          $CHANGELOG_TBL | Out-File -FilePath $(Build.SourcesDirectory)\check_changelog.sql
-          $CHANGELOG_TBL_RESULT = & "$(Oracle.Home)\bin\sqlplus" -s "$(username)/$(password)@//$(Database.Host):$(Database.Port)/$(Database.SID)" "$(Build.SourcesDirectory)\check_changelog.sql"
-
-          if ( $CHANGELOG_TBL_RESULT -match "0") {
-            Write-Host "##vso[task.setvariable variable=shouldRollbackPreview]false"
-          } else {
-            Write-Host "##vso[task.setvariable variable=shouldRollbackPreview]true"
-          }
-      displayName: 'Check Previous Deployments'
-
     # this task reviews the SQL statements that will be executed against the database before actually applying them
     # this task only runs if there's been a previous 'liquibase update' (deployment)
+    # preview rollback logic
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
         script: | 
-          $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
-          & "$(L_DIR)\liquibase.bat" `
-            --changeLogFile=$(L_CHANGELOG_FILE) `
-            --url=$URL `
-            --username="$(username)" `
-            --password="$(password)" `
-            rollbackSql 1 > ci-rollback-preview.sql
+          [xml]$changelog = Get-Content "$(Build.SourcesDirectory)\changelog.xml"
+          $versionNode = $changelog.databaseChangeLog.property | Where-Object { $_.name -eq "changeLogVersion" }
+          $tag = $versionNode.value
+          Write-Host "Using changelog version: $tag"
+
+          $sql = "SET HEADING OFF FEEDBACK OFF; SELECT COUNT(*) FROM DATABASECHANGELOG WHERE TAG = '$tag'; EXIT;"
+          $sql | Out-File -FilePath $(Build.SourcesDirectory)\check_tag.sql
+          $CHANGELOG_TBL_RESULT = & "$(Oracle.Home)\bin\sqlplus" -s "$(username)/$(password)@//$(Database.Host):$(Database.Port)/$(Database.SID)" "$(Build.SourcesDirectory)\check_tag.sql"
+          $exists = $result -match '^[1-9]'
+
+          if ($exists) {
+            Write-Host "Tag $tag exists. Generating rollback SQL..."
+            $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+            & "$(L_DIR)\liquibase.bat" `
+              --changeLogFile=$(L_CHANGELOG_FILE) `
+              --url=$URL `
+              --username="$(username)" `
+              --password="$(password)" `
+              rollbackSql 1 > ci-rollback-preview.sql
+          } else {
+            Write-Host "Tag $tag does not exist yet. Skipping rollback SQL preview."
+          }
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate Rollback SQL Preview'
-      condition: eq(variables['shouldRollbackPreview'], 'true')
 
+    # this task deploys to dev
     - task: PowerShell@2
       displayName: 'Deploy to Dev'
       inputs:
@@ -154,6 +137,7 @@ stages:
             update
         workingDirectory: $(Build.SourcesDirectory)
 
+    # mark version only after confirming safety
     - task: PowerShell@2
       displayName: 'Liquibase Tag'
       inputs:
@@ -201,7 +185,7 @@ stages:
           Copy-Item `
             -Path $(Build.SourcesDirectory)\* `
             -Destination $(Build.ArtifactStagingDirectory) `
-            -Exclude "LICENSE", "lib", "CHANGELOG.md", "azure-pipelines.yml", "check_changelog.sql" `
+            -Exclude "LICENSE", "lib", "CHANGELOG.md", "azure-pipelines.yml", "check_tag.sql" `
             -Recurse
 
 #    - task: ArchiveFiles@2
