@@ -114,7 +114,7 @@ stages:
 
           $CHANGELOG_TBL_RESULT = & "$(Oracle.Home)\bin\sqlplus" -s "$(username)/$(password)@//$(Database.Host):$(Database.Port)/$(Database.SID)" "$(Build.SourcesDirectory)\check_tag.sql"
     
-          if ($result.Trim() -match '^[1-9]') {
+          if ($CHANGELOG_TBL_RESULT.Trim() -match '^[1-9]') {
             Write-Host "Tag $tag exists. Generating rollback SQL..."
             $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
             & "$(L_DIR)\liquibase.bat" `
