@@ -124,7 +124,7 @@ stages:
               --password="$(password)" `
               rollbackSql 1 > rollback-preview.sql
           } else {
-            Write-Host "Tag $tag does not exist yet. Skipping rollback SQL preview."
+            Write-Host "Tag $tag does not exist yet. Skipping rollback SQL preview." > rollback-preview.txt
           }
         workingDirectory: $(Build.SourcesDirectory)
       displayName: 'Generate Rollback SQL Preview'
