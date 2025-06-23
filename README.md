@@ -40,4 +40,4 @@ CI Pipeline
     ├── rollback-preview.sql
     ├── version.txt
     └── liquibase.properties (optional)
-    ```
+```
