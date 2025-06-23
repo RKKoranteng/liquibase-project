@@ -60,7 +60,7 @@ stages:
       displayName: 'Validate Changelog'
 
     # this task states the number of undeployed changesets
-    # chec pending changes
+    # check pending changes
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
