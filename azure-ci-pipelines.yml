@@ -192,7 +192,7 @@ stages:
           Copy-Item `
             -Path $(Build.SourcesDirectory)\* `
             -Destination $(Build.ArtifactStagingDirectory) `
-            -Exclude "LICENSE", "lib", "CHANGELOG.md", "azure-ci-pipelines.yml", "azure-cd-pipelines.yml", "check_tag.sql" `
+            -Exclude "LICENSE", "lib", "CHANGELOG.md", "azure-ci-pipelines.yml", "azure-cd-pipelines.yml", "check_tag.sql", "README.md" `
             -Recurse
 
 #    - task: ArchiveFiles@2
