@@ -5,30 +5,24 @@
 # 
 
 variables:
-# Project.Name is not currently used in the pipeline operations
-  Project.Name: Liquibase
-
-# Application.Name is used in the pipeline run name and artifact creation/upload steps
-  Application.Name: DEMO
-
 # Name of Agent pool which is managed at the ADO organization level in Pipelines->Agent Pools
   Agent.PoolName: mylocal
 
-# BuildId is used in the pipeline run name, labels, and artifact creation/upload steps
-# App.Version: $(Build.BuildId)
-  App.Version: 1.1
-
 # SourceBranchName is used in checkout and labels
   Source.Branch: $(Build.SourceBranchName)
-# DatabaseTag is used to add tags in the database
-# Database.Tag: release1
 
-# The following variables are used in liquibase.properties
-# and also represents db connection string
+# Database connection details
+  # dev db enpoint
   Database.Host: localhost
   Database.SID: orcl
   Database.Port : 1521
+
+  # staging db endpoint
+  Staging.Host: localhost
+  Staging.SID: orcl
+  Staging.Port: 1521
   
+  # prod db enpoint
   Prod.Host: localhost
   Prod.SID: orcl
   Prod.Port: 1521
@@ -41,14 +35,15 @@ variables:
 # Oracle.Home is used in the pipeline to call utilities from oracle software bin
   Oracle.Home: 'C:\app\oracle\product\19'
 
-# username is used in liquibase.properties and references ADO variable $(username)
- # username
+# Thefollowinh variables are used in the pipeline and need to be created in ADO before hand
+  # ADO project environment variable
+    # 'staging' and 'prod'
 
-# pasword is used in liquibase.properties and references ADO variable $(password) 
- # password
+  # CI pipeline variables
+    # 'usermame' and 'password'
 
-# CD pipeline variables
- # dev.usermame
- # dev.password
+  # CD pipeline variables
+    # 'dev.usermame' and 'dev.password'
+    # 'prod.username' and 'prod.password'
 
  
