@@ -125,7 +125,7 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                $URL = "jdbc:oracle:thin:@//$(Database.Host):$(Database.Port)/$(Database.SID)"
+                $URL = "jdbc:oracle:thin:@//$(Staging.Host):$(Staging.Port)/$(Staging.SID)"
                 & "$(L_DIR)\liquibase.bat" `
                   --changeLogFile=$(L_CHANGELOG_FILE) `
                   --url=$URL `
