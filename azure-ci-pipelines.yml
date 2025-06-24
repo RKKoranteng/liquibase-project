@@ -3,13 +3,13 @@
 # @author: Richard Koranteng (https://rkkoranteng.com)
 # @changes: refer to CHANGELOG.md
 
-#trigger:
-#  branches:
-#    include:
-#      - main
-#  paths:
-#    include:
-#      - changelog.xml
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - changelog.xml
 
 appendCommitMessageToRunName: false
   
@@ -20,7 +20,6 @@ pool:
 
 variables:
 - template: variables.yml
-
 
 stages:
 
