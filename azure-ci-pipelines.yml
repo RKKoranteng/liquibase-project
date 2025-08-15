@@ -21,6 +21,20 @@ pool:
 variables:
 - template: variables.yml
 
+parameters:
+  - name: environment
+    displayName: Deployment Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - qa
+      - prod
+  - name: runTests
+    displayName: Run Unit Tests
+    type: boolean
+    default: true
+
 stages:
 
 # build
